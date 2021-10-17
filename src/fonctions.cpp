@@ -91,7 +91,7 @@ void tabu_iterator_increment(unsigned int l, unsigned int &tabu_iterator)
     tabu_iterator %= l;
 }
 
-void printsolution(unsigned int n, unsigned int best_min, unsigned int *best_configuration)
+void print_solution(unsigned int n, unsigned int best_min, unsigned int *best_configuration)
 {
     std::cout << std::endl;
     std::cout << "La meilleure configuration trouvée est : (";

@@ -59,6 +59,7 @@ int main(int argc, char const *argv[])
     {
         permutation_vector[i] = i;
     }
+    //* Shuffle the initial configuration (random)
     Knuth_Shuffle(permutation_vector, n, generator);
 
     for (size_t i = 0; i < ITERATIONS; i++)
@@ -78,22 +79,41 @@ int main(int argc, char const *argv[])
         //* Analyse du voisinage
         unsigned int local_min = 1000000;
         unsigned int best_neighbor[n];
+
+        //* Compute initial sum
+        unsigned int initial_sum = compute_sum(n, permutation_vector, D, W);
+
         for (size_t i = 0; i < (n - 1); i++)
         {
             for (size_t j = i + 1; j < n; j++)
             {
-                // Swap vector
+                //+ Swap vector
                 std::swap(swaped_vector[i], swaped_vector[j]);
-                unsigned int current_neighbor_sum = compute_sum(n, swaped_vector, D, W);
+
+                //+ Calcul de la somme des w[i][j]*d[phi(i)][phi(j)]
+                //unsigned int current_neighbor_sum = compute_sum(n, swaped_vector, D, W);
+
+                //+ Calcul de la somme avec les Delta
+                int delta = 0;
+                for (size_t k = 0; k < n; k++)
+                {
+                    if (k != i && k != j)
+                    {
+                        delta += (W[i][k] - W[j][k]) * (D[swaped_vector[i]][swaped_vector[k]] - D[swaped_vector[j]][swaped_vector[k]]);
+                    }
+                }
+                delta *= 2;
+                unsigned int current_neighbor_sum = initial_sum + delta;
+
                 if ((current_neighbor_sum < local_min) && !is_tabu(T, swaped_vector, l, n))
                 {
-                    //* Update best neighbor not tabu
+                    //+ Update best neighbor not tabu
                     local_min = current_neighbor_sum;
                     std::copy(swaped_vector, swaped_vector + n, best_neighbor);
                     //std::cout << "Le best neighbor vaut : " << best_neighbor[0] << ", " << best_neighbor[1] << ", " << best_neighbor[2] << ", " << best_neighbor[3] << ", " << best_neighbor[4] << ", " << best_neighbor[5] << ", " << best_neighbor[6] << ", " << best_neighbor[7] << ", " << best_neighbor[8] << ", " << best_neighbor[9] << ", " << best_neighbor[10] << ", " << best_neighbor[11] << std::endl;
                     //std::cout << "sum pour ce swap vaut : " << compute_sum(n, best_neighbor, D, W) << std::endl;
                 }
-                // Unswap vector
+                //+ Unswap vector
                 std::swap(swaped_vector[i], swaped_vector[j]);
             }
         }
@@ -108,5 +128,5 @@ int main(int argc, char const *argv[])
             std::copy(best_neighbor, best_neighbor + n, best_configuration);
         }
     }
-    printsolution(n, best_min, best_configuration);
+    print_solution(n, best_min, best_configuration);
 }
