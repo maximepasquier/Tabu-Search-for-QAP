@@ -8,7 +8,7 @@
 #include <iterator>
 #include <tuple>
 
-#define ITERATIONS 5000
+#define ITERATIONS 10000
 
 unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
 std::default_random_engine generator(seed);
@@ -27,7 +27,7 @@ int main(int argc, char const *argv[])
     //* Define tabu matrix
     unsigned int **T;
     //* Initialize tabu list length
-    const unsigned int l = 10;
+    const unsigned int l = 100;
     //* Initialize tabu iterator position
     unsigned int tabu_iterator = 0;
 
@@ -94,32 +94,6 @@ int main(int argc, char const *argv[])
         unsigned int local_min = 1000000;
         unsigned int best_neighbor[n];
 
-#if (1)
-        //* If diversification
-        if (i % (n * n) == 0)
-        {
-            unsigned int max = 0;
-            unsigned int colonne;
-            for (size_t i = 0; i < n; i++)
-            {
-                for (size_t j = 0; j < n; j++)
-                {
-                    if (Div[i][j] > max)
-                    {
-                        max = Div[i][j];
-                        colonne = j;
-                    }
-                }
-            }
-            std::uniform_int_distribution<unsigned int> rand_int(0, n);
-            while (unsigned int value = rand_int(generator) != colonne)
-            {
-                std::swap(swaped_vector[colonne], swaped_vector[value]);
-                break;
-            }
-        }
-#endif
-
         //* Compute initial sum
         unsigned int initial_sum = compute_sum(n, permutation_vector, D, W);
 
@@ -158,8 +132,34 @@ int main(int argc, char const *argv[])
             }
         }
 
-        //* Update permutation_vector
-        std::copy(best_neighbor, best_neighbor + n, permutation_vector);
+        //* If diversification
+        if (i % (n * n) == 0)
+        {
+            unsigned int max = 0;
+            unsigned int colonne;
+            for (size_t i = 0; i < n; i++)
+            {
+                for (size_t j = 0; j < n; j++)
+                {
+                    if (Div[i][j] > max)
+                    {
+                        max = Div[i][j];
+                        colonne = j;
+                    }
+                }
+            }
+            std::uniform_int_distribution<unsigned int> rand_int(0, n);
+            while (unsigned int value = rand_int(generator) != colonne)
+            {
+                std::swap(permutation_vector[colonne], permutation_vector[value]);
+                break;
+            }
+        }
+        else
+        {
+            //* Update permutation_vector
+            std::copy(best_neighbor, best_neighbor + n, permutation_vector);
+        }
 
         //* Update the best solution
         if (local_min < best_min)
