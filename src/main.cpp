@@ -8,7 +8,7 @@
 #include <iterator>
 #include <tuple>
 
-#define ITERATIONS 1000
+#define ITERATIONS 5000
 
 unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
 std::default_random_engine generator(seed);
@@ -22,11 +22,12 @@ int main(int argc, char const *argv[])
     //* Define matrices
     unsigned int **D;
     unsigned int **W;
+    unsigned int **Div;
 
     //* Define tabu matrix
     unsigned int **T;
     //* Initialize tabu list length
-    const unsigned int l = 100;
+    const unsigned int l = 10;
     //* Initialize tabu iterator position
     unsigned int tabu_iterator = 0;
 
@@ -44,6 +45,13 @@ int main(int argc, char const *argv[])
     for (size_t i = 0; i < l; i++)
     {
         T[i] = new unsigned int[n];
+    }
+
+    //* Initialize diversification matrix
+    Div = new unsigned int *[n];
+    for (size_t i = 0; i < n; i++)
+    {
+        Div[i] = new unsigned int[n];
     }
 
     //* Populate matrices
@@ -70,6 +78,12 @@ int main(int argc, char const *argv[])
         //* Increment tabu iterator
         tabu_iterator_increment(l, tabu_iterator);
 
+        //* Increment Diversification
+        for (size_t i = 0; i < n; i++)
+        {
+            Div[i][permutation_vector[i]]++;
+        }
+
         //print_tabu_list(T, l, n);
 
         //* Permutation vector
@@ -79,6 +93,32 @@ int main(int argc, char const *argv[])
         //* Analyse du voisinage
         unsigned int local_min = 1000000;
         unsigned int best_neighbor[n];
+
+#if (1)
+        //* If diversification
+        if (i % (n * n) == 0)
+        {
+            unsigned int max = 0;
+            unsigned int colonne;
+            for (size_t i = 0; i < n; i++)
+            {
+                for (size_t j = 0; j < n; j++)
+                {
+                    if (Div[i][j] > max)
+                    {
+                        max = Div[i][j];
+                        colonne = j;
+                    }
+                }
+            }
+            std::uniform_int_distribution<unsigned int> rand_int(0, n);
+            while (unsigned int value = rand_int(generator) != colonne)
+            {
+                std::swap(swaped_vector[colonne], swaped_vector[value]);
+                break;
+            }
+        }
+#endif
 
         //* Compute initial sum
         unsigned int initial_sum = compute_sum(n, permutation_vector, D, W);
@@ -129,4 +169,28 @@ int main(int argc, char const *argv[])
         }
     }
     print_solution(n, best_min, best_configuration);
+
+    std::cout << std::endl;
+
+    for (size_t i = 0; i < n; i++)
+    {
+        for (size_t j = 0; j < n; j++)
+        {
+            std::cout << Div[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << std::endl;
+
+    //* Free heap
+    for (size_t i = 0; i < n; i++)
+    {
+        /* code */
+    }
+
+    for (size_t i = 0; i < l; i++)
+    {
+        /* code */
+    }
 }
